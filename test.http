@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:5207
+
+### 1. Перша ідентифікація (має створити нову куку UserId)
+GET {{baseUrl}}/identify
+
+### 2. Повторна ідентифікація (має розпізнати стару куку, isNew: false)
+GET {{baseUrl}}/identify
+
+### 3. Перевірка з підробленою кукою (очікуємо 400 Bad Request)
+GET {{baseUrl}}/identify
+Cookie: UserId=fake-broken-id-123
+
+### 4. Спроба переглянути порожній кошик (очікуємо 400 Bad Request)
+GET {{baseUrl}}/cart
+
+### 5. Додавання валідного товару (1 шт. за замовчуванням -> 200 OK)
+POST {{baseUrl}}/cart/add/1
+
+### 6. Додавання ще одного товару з вказанням кількості (3 шт. -> 200 OK)
+POST {{baseUrl}}/cart/add/2?quantity=3
+
+### 7. Додавання того ж товару №1 ще раз (кількість має стати 2)
+POST {{baseUrl}}/cart/add/1
+
+### 8. Перегляд заповненого кошика (очікуємо JSON зі списком товарів та сумами)
+GET {{baseUrl}}/cart
+
+### 9. Негативний тест: неіснуючий товар (очікуємо 404 Not Found)
+POST {{baseUrl}}/cart/add/999
+
+### 10. Негативний тест: некоректна кількість (очікуємо 400 Bad Request)
+POST {{baseUrl}}/cart/add/1?quantity=-5
+
+### 11. Негативний тест: нульова кількість (очікуємо 400 Bad Request)
+POST {{baseUrl}}/cart/add/1?quantity=0
+
+### 12. Очищення кошика (очікуємо 200 OK)
+DELETE {{baseUrl}}/cart/clear
+
+### 13. Перевірка кошика після очищення (знову 400 Bad Request, бо порожньо)
+GET {{baseUrl}}/cart
